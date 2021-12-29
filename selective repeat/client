@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#define PORT 3210
+
+int main()
+{
+    int sockfd;
+    struct sockaddr_in servad;
+    int len,n,c;
+
+    sockfd=socket(AF_INET,SOCK_DGRAM,0);
+
+    memset(&servad,0,sizeof(servad));
+
+    servad.sin_family=AF_INET;
+    servad.sin_addr.s_addr=inet_addr("127.0.0.9");
+    servad.sin_port=htons(PORT);
+
+    len=sizeof(servad);
+
+    int buf[100],ack;
+    memset(buf,'\0',100);
+
+    int win,frames,j,k,rep=0;
+    char space=' ',temp;
+    printf("Enter the number of frames : ");
+    scanf("%d",&frames);
+    printf("Enter the size of window : ");
+    scanf("%d",&win);
+    int count=0;
+    for(j=1;j<=frames && count<40;j++)
+    {
+    	if (rep==1)
+    	{
+    		buf[0]=j;
+    		rep=0;
+    		k=1;
+    	}
+    	else
+        for(k=0;j+k<=frames && k<win;k++)
+                buf[k]=j+k;
+        sendto(sockfd,buf,k*sizeof(int),MSG_CONFIRM,(struct sockaddr*)&servad,len);
+        printf("Sent window of frames : ");
+        for(c=0;c<k;c++) printf("%d ",buf[c]);
+        printf("\n");
+
+        recvfrom(sockfd,&ack,1,MSG_WAITALL,(struct sockaddr*)&servad,&len);
+        if(ack!=0)
+        {
+            printf("Negative acknowledgement received from server for frame %d.. resending window\n",ack);
+            rep=1;
+            j=ack-1;
+        }
+        memset(buf,'\0',100);
+        count++;
+    }
+
+    return 0;
+}
