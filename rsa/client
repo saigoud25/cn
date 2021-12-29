@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <math.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#define PORT 4444
+
+double gcd(double A, double B)
+{
+        double temp;
+        while(A!=B){
+                if(B>A){
+                        temp=A;
+                        A=B;
+                        B=temp;
+                }
+                A=A-B;
+        }
+        return A;
+}
+
+
+int main()
+{
+int sockfd, n, clilen;
+struct sockaddr_in servad;
+
+double P,Q,N,Z,d,e,msg;
+
+memset(&servad,0,sizeof(servad));
+servad.sin_family      = AF_INET;
+servad.sin_port        = htons(PORT);
+servad.sin_addr.s_addr = inet_addr("127.0.0.9");
+clilen                 = sizeof(servad);
+
+sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+connect(sockfd, (struct sockaddr*) &servad, clilen);
+printf("Connection successful..\n");
+
+printf("Enter the value for P : ");
+scanf("%lf",&P);
+printf("Enter the value for Q : ");
+scanf("%lf",&Q);
+N = P*Q;
+Z = (P-1)*(Q-1);
+printf("Value of N : %lf\nValue of Z : %lf\n",N,Z);
+
+for(d=2;d<Z;d++)
+{if(gcd(Z,d)==1) break;}
+
+for(e=1;e<Z;e++)
+if((int)(e*d-1)%(int)Z==0) break;
+
+printf("Value of d : %lf\nValue of e : %lf\n",d,e);
+send(sockfd,&N,sizeof(double),0);
+printf("Sent to server N : %lf\n",N);
+send(sockfd,&d,sizeof(double),0);
+printf("Sent to server : %lf\n",d);
+
+n = recv(sockfd,&msg,sizeof(double),0);
+printf("Data received from server : %lf\n",msg);
+
+printf("Decrypting...\n");
+
+msg = fmod(pow(msg,e),N);
+
+printf("Decrypted message : %lf\n",msg);
+printf("Closing connection..\n");
+close(sockfd);
+
+return 1;
+
+}
