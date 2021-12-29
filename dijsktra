@@ -1,0 +1,78 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+int Seq(int fro[],int dis[],int St,int Tar)
+{
+int c=0;
+if(fro[Tar-1]!=St)
+c=Seq(fro,dis,St,fro[Tar-1]);
+printf("%d to %d (%d)\n",fro[Tar-1],Tar,dis[Tar-1]-c);
+return dis[Tar-1];
+}
+
+
+int main()
+{
+int N, E, j, k, u, v, cost, max=-1, St, Tar, check=0, min, temp, count=0;
+printf("Enter the number of nodes : ");
+scanf("%d",&N);
+printf("Enter the number of edges : ");
+scanf("%d",&E);
+int graph[N][N];
+int visited[N];
+int dist[N];
+int from[N];
+for(j=0; j<N; j++)
+{for(k=0; k<N; k++)
+graph[j][k]=-1;
+visited[j]=0; from[j]=0;}
+printf("Enter the edges as u to v and costs : \nu\tv\tcosts\n--\t--\t-----\n");
+for(j=0; j<E; j++)
+{
+scanf("%d %d %d",&u,&v,&cost);
+graph[u-1][v-1]=cost;
+if(max<cost) max=cost;
+}
+for(j=0; j<N; j++)
+dist[j]=max*100;
+
+printf("Enter the starting node : ");
+scanf("%d",&St);
+dist[St-1]=0;
+
+while(check==0 && count<N*N)
+{
+for(k=0;k<N;k++)
+if(dist[min]>dist[k] && visited[k]==0) min=k;
+
+for(k=0;k<N;k++)
+{
+if(graph[min][k]==-1) continue;
+if(dist[min]+graph[min][k] < dist[k])
+{
+dist[k]=dist[min]+graph[min][k];
+from[k]=min+1;
+temp=k;
+}
+}
+visited[min]=1;
+min=temp;
+check=1;
+for(k=0;k<N;k++)
+check*=visited[k];
+count++;
+}
+
+for(Tar=1; Tar<N+1; Tar++)
+{
+if(Tar==St) continue;
+if(from[Tar-1]==0) printf("Unreachable\n");
+else
+{
+printf("Total distance to reach %d is : %d\n",Tar,dist[Tar-1]);
+printf("Path :\n");
+int p=Seq(from,dist,St,Tar);
+printf("\n");
+}
+}
+}
