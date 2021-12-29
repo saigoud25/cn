@@ -1,0 +1,44 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define MAX 9999
+
+int main()
+{
+    int N,E,j,k,src;
+    printf("Enter the number of nodes : ");
+    scanf("%d",&N);
+    
+    printf("Enter the number of edges : ");
+    scanf("%d",&E);
+    
+    int dists[N+1];
+    int edges[E][3];
+    
+    printf("Enter the edges with costs :\nu\tv\tcost\n---\t---\t-----\n");
+    for(j=0;j<E;j++){
+        scanf("%d %d %d",&edges[j][0],&edges[j][1],&edges[j][2]);
+    }
+    
+    for(j=0;j<N+1;j++)
+    dists[j]=MAX;
+    
+    printf("Enter the source vertex : ");
+    scanf("%d",&src);
+    
+    dists[src]=0;
+    
+    for(j=0;j<N;j++){
+        for(k=0;k<E;k++){
+            if (dists[edges[k][0]]+edges[k][2]<dists[edges[k][1]]){
+                dists[edges[k][1]]=dists[edges[k][0]]+edges[k][2];
+            }
+        }
+    }
+    
+    printf("Dest\tCost\n----\t----\n");
+    for(j=1;j<N+1;j++)
+    {
+        printf("%d\t%d\n",j,dists[j]);
+    }
+}
