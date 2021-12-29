@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <math.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#define PORT 4444
+
+int main()
+{
+int sockfd, connfd, n, clilen;
+struct sockaddr_in servad, cliad;
+
+double msg, d, N;
+
+memset(&servad,'\0',sizeof(servad));
+servad.sin_family      = AF_INET;
+servad.sin_port        = htons(PORT);
+servad.sin_addr.s_addr = inet_addr("127.0.0.9");
+clilen                 = sizeof(servad);
+
+sockfd = socket(AF_INET, SOCK_STREAM, 0);
+bind(sockfd, (struct sockaddr*)&servad, clilen);
+listen(sockfd, 10);
+
+connfd = accept(sockfd, (struct sockaddr*) &cliad, &clilen);
+printf("Connection successful..\n");
+
+printf("Enter the message : ");
+scanf("%lf",&msg);
+n = recv(connfd, &N, sizeof(double), 0);
+printf("Received N : %lf\n",N);
+n = recv(connfd, &d, sizeof(double), 0);
+printf("Received public key : %lf\n",d);
+
+printf("Encrypting...\n");
+msg = fmod(pow(msg,d),N);
+
+printf("Encrypted message : %lf\n",msg);
+send(connfd, &msg, sizeof(double), 0);
+printf("Sent to client : %lf\n",msg);
+
+printf("Closing connection..\n");
+close(connfd);
+close(sockfd);
+
+return 1;
+
+}
