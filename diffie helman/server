@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <math.h>
+
+#define MAX 100
+#define PORT 4400
+
+int main()
+{
+int sockfd,n;
+double P,g,senddata,key,b;
+socklen_t clilen;
+struct sockaddr_in servaddr;
+
+sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+memset(&servaddr, 0, sizeof(servaddr));
+servaddr.sin_family      = AF_INET;
+servaddr.sin_port        = htons(PORT);
+servaddr.sin_addr.s_addr = inet_addr("127.0.0.9");
+clilen                   = sizeof(servaddr);
+
+connect(sockfd,(struct sockaddr*)&servaddr,sizeof(servaddr));
+printf("Client started and connected successfully..\n");
+
+printf("Enter value for P : ");
+scanf("%lf",&P);
+
+printf("Enter value for g : ");
+scanf("%lf",&g);
+
+printf("Enter value for b : ");
+scanf("%lf",&b);
+
+n = recv(sockfd, &key, sizeof(double), 0);
+if(n<=0)
+{printf("Error in receiving data..\n");
+exit(0);}
+
+printf("Received data from server(ALICE) : %lf\n",key);
+
+senddata=fmod(pow(g,b),P);
+send(sockfd, &senddata, sizeof(double), 0);
+printf("Data sent by client(BOB)         : %lf\n",senddata);
+
+key=fmod(pow(key,b),P);
+printf("Shared secret key = %lf\n",key);
+
+close(sockfd);
+
+return 1;
+}
