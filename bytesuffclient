@@ -1,0 +1,65 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<sys/socket.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+#include<arpa/inet.h>
+
+#define PORT 4444
+
+int main()
+{
+	int sockfd;
+	sockfd = socket(AF_INET,SOCK_STREAM,0);
+
+	struct sockaddr_in servaddr;
+	memset(&servaddr, 0, sizeof(servaddr));
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_port = htons(PORT);
+	servaddr.sin_addr.s_addr = inet_addr("127.0.0.9");
+
+	connect(sockfd,(struct sockaddr*) &servaddr, sizeof(servaddr));
+
+	int j,n;
+	printf("Enter total sequences : ");
+	scanf("%d",&n);
+	char seq[n];
+
+	printf("Only three sequences possible :\n");
+	printf("D : Data sequence\n");
+	printf("E : Escape sequence\n");
+	printf("F : Flag sequence\n");
+printf("Enter the sequences to be sent : \n");
+	scanf("%c ",&seq[j]);
+	for(j=0;j<n;j++)
+		scanf("%c ",&seq[j]);
+	
+char senddata[2*n+2];
+	printf("Actual data : ");
+	for(j=0;j<n;j++)
+		printf("%c",seq[j]);
+	printf("\n");
+	senddata[0]='F';
+	int k=1;
+	for(j=0;j<n;j++){
+		if(seq[j]=='D'){
+			senddata[k]=seq[j];
+			k++;
+		}else{
+			senddata[k]='E';
+			senddata[k+1]=seq[j];
+			k+=2;
+		}
+	}
+	
+senddata[k]='F';
+	printf("The sequence being sent is : \n");
+	for(j=0;j<=k;j++)
+		printf("%c",senddata[j]);
+	printf("\n");
+	
+  send(sockfd,senddata,strlen(senddata),0);
+  close(sockfd);	
+	return 0;
+}
