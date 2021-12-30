@@ -1,0 +1,66 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<arpa/inet.h>
+
+#define PORT 4444
+
+int main()
+{
+    int sockfd;
+    struct sockaddr_in servaddr;
+    sockfd=socket(AF_INET,SOCK_STREAM,0);
+if (sockfd<0){
+      printf("%s\n","Socket creation failed..");
+      exit(0);
+    }
+
+    memset(&servaddr,0,sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(PORT);
+    servaddr.sin_addr.s_addr = inet_addr("127.0.0.9");
+
+    printf("Socket created successfully..\n");
+
+    connect(sockfd, (struct sockaddr*) &servaddr, sizeof(servaddr));
+    printf("Connected to server successfully..\n");
+    
+    int a[20],i,j,k,count,n;
+    char b[30]={'\0'};
+    printf("Enter frame size (Example: 8):");
+    scanf("%d",&n);
+    printf("Enter the frame in the form of 0 and 1 :");
+      for(i=0; i<n; i++)     scanf("%d",&a[i]);
+    i=0;
+    count=1;
+    j=0;
+    while(i<n)  {
+        if(a[i]==1)  {
+            b[j]='1';
+            count=1;
+            for(k=i+1; a[k]==1 && k<n && count<5; k++)
+            {
+                j++;
+                b[j]='1';
+                count++;
+                if(count==5)   {
+                    j++;
+                    b[j]='0';    }
+                i=k;
+            }   }
+        else
+              b[j]='0';
+        i++;
+        j++;
+    }
+    printf("After Bit Stuffing :");
+    for(i=0; i<j; i++)  printf("%c",b[i]);
+
+    printf("\n");
+    printf("Bit stuffed data sent to server.\n");
+    send(sockfd, b, 30, 0);
+    return 0;
+}
